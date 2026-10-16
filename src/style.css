@@ -64,34 +64,34 @@
 }
 
 [data-theme='dark'] {
-  /* Unique Dark Theme: Obsidian Cypress / Dark Jade (No Brown, No Blue) */
-  --bg: #0C1210;
-  --surface: #131C19;
-  --raised: #1A2622;
-  --border: #253630;
-  --text: #E8F1ED;
-  --muted: #8AA59B;
+  /* Matte Black / Charcoal Obsidian UI (Balanced, gentle contrast, no harsh glare) */
+  --bg: #0F0F11;
+  --surface: #18181B;
+  --raised: #222226;
+  --border: #2C2C32;
+  --text: #E2E2E6;
+  --muted: #92929D;
   --accent: #2DD4BF;
   --accent-hover: #14B8A6;
-  --accent-tint: #132B24;
+  --accent-tint: #142320;
   --highlight: #FBBF24;
-  --highlight-tint: #292408;
+  --highlight-tint: #242010;
   --success: #22C55E;
   --error: #F87171;
 
   --tag-advanced: #FB923C;
 
-  --code-bg: #0E1613;
-  --code-text: #E8F1ED;
-  --code-comment: #758D84;
+  --code-bg: #0B0B0D;
+  --code-text: #E2E2E6;
+  --code-comment: #767682;
   --code-keyword: #5EEAD4;
   --code-number: #FBBF24;
   --code-string: #A3E635;
   --code-function: #6EE7B7;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
-  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.45), 0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5), 0 16px 36px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.6), 0 16px 36px rgba(0, 0, 0, 0.65);
 }
 
 /* --------------------------------------------------------------------------
