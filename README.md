@@ -1,75 +1,185 @@
-# Distribution Solver
+# Probability Distribution Solver
 
-A probability distribution calculator and word-problem solver for exam practice built with Vite, TypeScript, and vanilla DOM. Pick a distribution (or type a question), and get high-precision answers, exam-style step-by-step working with formulas, interactive shaded SVG distribution plots, and runnable base-R code.
+A Vite + TypeScript web app for solving probability-distribution questions in two ways:
+
+- **Calculator mode**: choose a distribution, enter parameters, and run a specific query.
+- **Ask-a-problem mode**: paste a worded question and let the parser detect the model/query before solving.
+
+It is designed for exam-style practice and transparent working: you get formulas, substitutions, final values, plotted regions, and matching base-R code.
+
+## Project overview
+
+This project combines:
+
+- A **deterministic TypeScript math engine** (core calculations)
+- A **rule-based natural-language parser** (Layer A)
+- An optional **Gemini-assisted parser** path (Layer B) for server/API usage
+- A browser UI with charts, question bank, and worked steps
+
+> The parser extracts structure. The local math engine computes results.
+
+## Workflows
+
+### 1) Calculator mode
+
+Use when you already know the distribution and parameters.
+
+1. Select one of the six distributions.
+2. Enter parameters using R-style parameterization.
+3. Choose a query type (probability, quantile, moments, etc.).
+4. Solve to get step-by-step output, chart shading, and R code.
+
+### 2) Ask-a-problem mode
+
+Use for natural-language questions.
+
+1. Paste a worded problem (for example: “at least”, “at most”, “between”, “mean”, “variance”).
+2. Layer A parser maps the text to distribution + parameters + query.
+3. The deterministic engine evaluates the parsed query.
+4. If details are missing/ambiguous, the app returns a clarification message.
+
+## Supported distributions and parameterization
+
+All distributions follow R conventions used by the generated code.
+
+| Distribution | Parameters | Constraints | Notes |
+|---|---|---|---|
+| Binomial | `size = n`, `prob = p` | `n` integer, `n >= 0`; `0 <= p <= 1` | Discrete |
+| Poisson | `lambda` | `lambda > 0` | Discrete |
+| Normal | `mean = mu`, `sd = sigma` | `sd > 0` | Continuous |
+| Exponential | `rate = lambda` | `lambda > 0` | Continuous |
+| Gamma | `shape = alpha`, `rate = lambda` | `shape > 0`, `rate > 0` | Continuous; if scale is given, parser converts `rate = 1/scale` |
+| Weibull | `shape = k`, `scale = lambda` | `shape > 0`, `scale > 0` | Continuous; if rate is given, parser converts `scale = 1/rate` |
+
+## Supported query types
+
+- Point probability / density: `P(X = x)`
+- Cumulative and tail probabilities: `P(X <= x)`, `P(X < x)`, `P(X >= x)`, `P(X > x)`
+- Interval probability: `P(a <= X <= b)`
+- Quantiles and cutoffs (including top/bottom percentile style prompts)
+- Moments/statistics: mean, variance, standard deviation
+- MGF evaluation at `t`
+- Conditional survival style queries `P(X > s+t | X > s)`
 
 ## Features
 
-- **Six distributions:** Binomial, Poisson, Normal, Exponential, Gamma, Weibull
-- **Calculator mode:** enter parameters and choose P(X = x), P(X ≤ x), P(X ≥ x), P(a ≤ X ≤ b), quantiles, moments, or the MGF
-- **Ask-a-problem mode:** paste a worded question and the solver extracts the distribution, parameters, and query
-- **Step-by-step working** with formulas, substitution, and evaluated result
-- **Interactive SVG charts** with queried regions shaded (PMF bars or PDF curve) and hover inspection
-- **Runnable base-R script** for every solution, with Copy and Download `.R` buttons
-- **Summary statistics:** mean, variance, SD, skewness, excess kurtosis, median, mode, MGF
-- **Practice variations & Question bank:** 100 questions per distribution with instant solution loading
-- **Themes & Responsive layout:** Light and Obsidian Cypress dark theme, fully optimized for desktop and mobile
+- Six distributions: Binomial, Poisson, Normal, Exponential, Gamma, Weibull
+- Two solving workflows: calculator + ask-a-problem
+- Step-by-step derivations with formulas and substitutions
+- Interactive SVG visualization with highlighted queried region
+- Generated base-R script for each solution (copy/download)
+- Summary metrics (mean, variance, SD, skewness, excess kurtosis, median, mode, MGF)
+- Built-in question bank (**600 total; 100 per distribution**)
+- Practice variations and responsive light/dark UI
 
-## How accuracy is ensured
+## Practical usage examples
 
-The language-understanding layer only reads the question and extracts the distribution, parameters, and what is being asked. **A deterministic math engine does all calculations**, and no result is hardcoded.
+### Calculator-style queries
 
-- Special functions implemented from scratch (log-gamma, error function, incomplete gamma and beta, inverse normal CDF)
-- Engine tested against SciPy reference values plus property tests (PMFs sum to 1, CDFs are monotonic, quantile round-trips, distribution identities)
-- Invalid input shows a validation message and never NaN or Infinity
+- Binomial: `n = 15, p = 0.8`, query `P(X >= 12)`
+- Normal: `mu = 100, sigma = 15`, query `P(X <= 115)`
+- Weibull: `shape = 2.5, scale = 100`, query “top 10% cutoff” (quantile)
 
-## Parameterization (R convention)
+### Ask-a-problem prompts
 
-| Distribution | Parameters |
-|---|---|
-| Binomial | size $n$, prob $p$ |
-| Poisson | $\lambda$ |
-| Normal | mean $\mu$, sd $\sigma$ |
-| Exponential | rate $\lambda$ |
-| Gamma | shape $\alpha$, rate $\lambda$ |
-| Weibull | shape $k$, scale $\lambda$ |
+- “A basketball player takes 15 free throws with an 80% success rate. What is the probability of making at least 12 free throws?”
+- “IQ scores are normally distributed with mean 100 and standard deviation 15. What is the probability of at most 115?”
+- “A project duration follows a Gamma distribution with shape 4 and rate 0.8. What is the probability of completion between 2 and 6 weeks?”
 
-## Directory Layout
+## Accuracy and validation
 
-```
-distribution-solver/
-├── src/
-│   ├── engine/       # Mathematical computations, distributions, CDF/PDF/quantile functions
-│   ├── solver/       # Natural language & question parsing into distribution queries
-│   ├── rgen/         # Base-R code generator matching R distribution conventions
-│   ├── ui/           # Vanilla DOM UI components, input controls, and renderers
-│   ├── data/         # 600-question practice database (100 per distribution)
-│   ├── main.ts       # Application entry point
-│   └── style.css     # UI styles and themes
-├── tests/            # Vitest unit & integration test suites
-│   └── golden/       # Golden test reference data and verification benchmarks
-├── index.html        # Main HTML page
-├── package.json      # Dependencies and npm scripts
-├── tsconfig.json     # TypeScript configuration
-└── README.md         # Project documentation and ground rules
-```
+The repository validates numerical safety and correctness through:
 
-## Getting started
+- **Finite-number guards** (`undefined`/`null`/`NaN`/`Infinity` rejected)
+- Distribution parameter validation before evaluation
+- Property tests (examples: PMF sums, CDF monotonicity, quantile round-trips, distribution identities)
+- Golden/reference verification against SciPy-style benchmark data (`tests/golden/golden.json`)
+
+Core special functions are implemented in TypeScript (for example `logGamma`, error-function/normal helpers, incomplete-gamma/beta-based routines), and calculations are executed locally by the engine.
+
+## Setup
+
+### Prerequisites
+
+- **Node.js 18+** (recommended current LTS)
+- **npm**
+- Optional: **R** (`Rscript`) if you want to execute generated `.R` scripts
+
+### Install and run
 
 ```bash
 git clone https://github.com/Shree-svg/probability-distribution-solver.git
 cd probability-distribution-solver
 npm install
-npm run dev        # start the Vite dev server
-npm test           # run Vitest test suite
-npm run build      # compile production bundle
+npm run dev
 ```
 
-Optional: copy `.env.example` to `.env` and add `GEMINI_API_KEY` to enable the LLM-assisted question parser. Without it, the offline rule-based parser is used automatically.
-To cross-check the generated R scripts, install [R](https://www.r-project.org/) so `Rscript` is available.
+Open the local Vite URL shown in the terminal.
 
-## Tech stack
+## Available npm scripts
 
-TypeScript, Vite, Vitest, KaTeX, SVG charts, base R (generated scripts)
+- `npm run dev` — start Vite dev server
+- `npm run build` — TypeScript check + production build
+- `npm run preview` — preview built app
+- `npm test` — run Vitest suite once
+- `npm run test:watch` — run Vitest in watch mode
+
+## Optional Gemini configuration
+
+The UI works fully offline with **Layer A** (rule-based parser).  
+If you want to use **Layer B (Gemini API)** in server/API workflows:
+
+1. Copy environment template:
+   ```bash
+   cp .env.example .env
+   ```
+2. Set:
+   - `GEMINI_API_KEY=...`
+   - optional `PORT=3001`
+
+The server helper is in `src/solver/server.ts` (`/api/health`, `/api/solve`) and falls back to Layer A when Gemini is unavailable.
+
+## Using generated R code (optional)
+
+The app can produce base-R code per solution. To run it locally:
+
+1. Save the generated snippet/script to a `.R` file.
+2. Execute with:
+   ```bash
+   Rscript your_file.R
+   ```
+
+## Directory layout
+
+```text
+probability-distribution-solver/
+├── src/
+│   ├── engine/          # Deterministic distribution math + validation
+│   ├── solver/          # Layer A parser + optional Layer B/API server helper
+│   ├── rgen/            # Base-R code/script generation
+│   ├── data/            # Question bank data and access helpers
+│   ├── ui/              # Browser app UI and rendering logic
+│   ├── main.ts          # Frontend entry point
+│   └── style.css
+├── tests/               # Vitest suites (engine, solver, properties, validation)
+│   └── golden/          # Golden benchmark datasets/references
+├── scripts/             # Utility scripts (question generation/screenshot helpers)
+├── package.json
+├── .env.example
+└── README.md
+```
+
+## Contributing / development
+
+- Keep changes consistent with R parameterization conventions used by the engine/rgen.
+- Run checks before opening a PR:
+
+```bash
+npm test
+npm run build
+```
+
+- Add or update tests with behavior changes (engine, parser, or integration paths).
 
 ## License
 
